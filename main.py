@@ -10,6 +10,9 @@ from panda3d.core import Vec4, Vec3
 from panda3d.core import CollisionTraverser
 from panda3d.core import CollisionHandlerPusher
 
+#Dépendances
+from config import *
+
 class Game(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
@@ -33,6 +36,9 @@ class Game(ShowBase):
         self.pusher = CollisionHandlerPusher()
         # Pour la gestion de l'arbre de collisions
         base.cTrav = CollisionTraverser()
+        # gestion des déplacements
+        self.Init_mvt()      
+        
         
     def Init_eclairage(self):
         
@@ -45,11 +51,41 @@ class Game(ShowBase):
         self.mainLightNodePath.setHpr(45, -45, 0)
         render.setLight(self.mainLightNodePath)
         render.setShaderAuto()        
-        
-    # réglage de la caméra
+#================================================================        
+# réglage de la caméra
+#================================================================   
     def Cam_init(self):
         self.cam.setPos(0, -25, 36)
         self.cam.lookAt(0,5,0)
+#================================================================        
+# réglage des mvts
+#================================================================          
+    def Init_mvt(self):
+        self.accept("arrow_up", self.updateKeyMap, ["up", True])
+        self.accept("arrow_up-up", self.updateKeyMap, ["up", False])
+        self.accept("arrow_down", self.updateKeyMap, ["down", True])
+        self.accept("arrow_down-up", self.updateKeyMap, ["down", False])
+        self.accept("arrow_left", self.updateKeyMap, ["left", True])
+        self.accept("arrow_left-up", self.updateKeyMap, ["left", False])
+        self.accept("arrow_right", self.updateKeyMap, ["right", True])
+        self.accept("arrow_right-up", self.updateKeyMap, ["right", False])
+        self.accept("space", self.updateKeyMap, ["shoot", True])
+        self.accept("space-up", self.updateKeyMap, ["shoot", False])
+#================================================================        
+# gestionnaire des evénements joueur
+#================================================================            
+    def updateKeyMap(self, controlName, controlState):
+        self.keyMap[controlName] = controlState
+        print (controlName, "mis a", controlState)
+#================================================================        
+# boucle d'activités
+#================================================================  
+    def update(self, task):
+    # Pour chaque unité de temps
+        dt = globalClock.getDt()
+        #self.heros.update(self.keyMap, dt)
+        #self.tempEnemy.update(self.player, dt)
+        return task.cont
         
 game = Game()
 game.run()
