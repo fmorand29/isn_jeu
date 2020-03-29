@@ -15,6 +15,7 @@ from panda3d.core import CollisionTube
 from config import *
 from obj_actifs import *
 from obj_inactifs import *
+from armes import *
 
 class Game(ShowBase):
     def __init__(self):
@@ -27,6 +28,7 @@ class Game(ShowBase):
             "shoot" : False
                         }
         self.base=base
+        self.boule_time=0
         base.setFrameRateMeter(True)  # mesure le FPS
         # Création du plateau de jeu
         self.environment = loader.loadModel("./Environment/environment")
@@ -59,6 +61,9 @@ class Game(ShowBase):
         self.tour2.obj.reparentTo(render)
         self.sorcier=obj_inactifs(Vec3(12, 9, 6),"sorcier/wizard",130,"SORCIER",0.45)
         self.sorcier.obj.reparentTo(render)
+        
+        #init des armes
+        self.boule=Boule_feu(self)
         
         # initialisation des déplacements
         self.Init_mvt()
@@ -134,14 +139,18 @@ class Game(ShowBase):
 #================================================================            
     def updateKeyMap(self, controlName, controlState):
         self.keyMap[controlName] = controlState
-        print (controlName, "mis a", controlState)
+        #print (controlName, "mis a", controlState)
 #================================================================        
 # boucle d'activités
 #================================================================  
     def update(self, task):
     # Pour chaque unité de temps
         dt = globalClock.getDt()
+        self.boule_time+=1
         self.heros.update(self.keyMap, dt)
+        if self.boule_time>50:
+           self.boule_time=0 
+           self.boule.update(self.keyMap, dt)
         #self.tempEnemy.update(self.player, dt)
         return task.cont
         
