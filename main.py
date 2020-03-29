@@ -9,9 +9,12 @@ from panda3d.core import DirectionalLight
 from panda3d.core import Vec4, Vec3
 from panda3d.core import CollisionTraverser
 from panda3d.core import CollisionHandlerPusher
+from panda3d.core import CollisionTube
 
 #Dépendances
 from config import *
+from obj_actifs import *
+from obj_inactifs import *
 
 class Game(ShowBase):
     def __init__(self):
@@ -23,6 +26,7 @@ class Game(ShowBase):
             "right" : False,
             "shoot" : False
                         }
+        self.base=base
         base.setFrameRateMeter(True)  # mesure le FPS
         # Création du plateau de jeu
         self.environment = loader.loadModel("./Environment/environment")
@@ -37,7 +41,31 @@ class Game(ShowBase):
         # Pour la gestion de l'arbre de collisions
         base.cTrav = CollisionTraverser()
         # gestion des déplacements
-        self.Init_mvt()      
+        self.Init_mvt()
+        
+        # création du heros selon le modele ./fox/Fox
+        self.heros=Heros(self,Vec3(0, 0, 0),"./fox/Fox",
+                              {
+                                  "stand" : "./fox/Fox-Idle_fp",
+                                  "walk" : "./fox/Fox-Walk_fp"
+                              },
+                            5,
+                            10,"HEROS",2)
+        self.heros.actor.reparentTo(render)
+        # création des objets de décors
+        self.tour1=obj_inactifs(Vec3(12, 9, 1),"tour/tour",0,"T1",1)
+        self.tour1.obj.reparentTo(render)
+        self.tour2=obj_inactifs(Vec3(-12, 9, 1),"tour/tour",0,"T2",1)
+        self.tour2.obj.reparentTo(render)
+        self.sorcier=obj_inactifs(Vec3(12, 9, 6),"sorcier/wizard",130,"SORCIER",0.45)
+        self.sorcier.obj.reparentTo(render)
+        
+        # initialisation des déplacements
+        self.Init_mvt()
+        # initialisation des zones de collisions du decor
+        self.Init_coll()
+        # activation des évènements
+        self.updateTask = taskMgr.add(self.update, "update")
         
         
     def Init_eclairage(self):
@@ -72,6 +100,36 @@ class Game(ShowBase):
         self.accept("space", self.updateKeyMap, ["shoot", True])
         self.accept("space-up", self.updateKeyMap, ["shoot", False])
 #================================================================        
+# Création des zones de collisions pour le décor
+# 4 murs
+# TODO : A améliorer algorithmiquement
+#================================================================            
+    def Init_coll(self):
+        wallSolid = CollisionTube(-8.0, 0, 0, 8.0, 0, 0, 0.2)
+        wallNode = CollisionNode("MUR")
+        wallNode.addSolid(wallSolid)
+        wall = render.attachNewNode(wallNode)
+        wall.setY(8.0)
+        wall.show()
+        wallSolid = CollisionTube(-8.0, 0, 0, 8.0, 0, 0, 0.2)
+        wallNode = CollisionNode("MUR")
+        wallNode.addSolid(wallSolid)
+        wall = render.attachNewNode(wallNode)
+        wall.setY(-8.0)
+        wall.show()
+        wallSolid = CollisionTube(0, -8.0, 0, 0, 8.0, 0, 0.2)
+        wallNode = CollisionNode("MUR")
+        wallNode.addSolid(wallSolid)
+        wall = render.attachNewNode(wallNode)
+        wall.setX(8.0)
+        wall.show()
+        wallSolid = CollisionTube(0, -8.0, 0, 0, 8.0, 0, 0.2)
+        wallNode = CollisionNode("MUR")
+        wallNode.addSolid(wallSolid)
+        wall = render.attachNewNode(wallNode)
+        wall.setX(-8.0)
+        wall.show()
+#================================================================        
 # gestionnaire des evénements joueur
 #================================================================            
     def updateKeyMap(self, controlName, controlState):
@@ -83,7 +141,7 @@ class Game(ShowBase):
     def update(self, task):
     # Pour chaque unité de temps
         dt = globalClock.getDt()
-        #self.heros.update(self.keyMap, dt)
+        self.heros.update(self.keyMap, dt)
         #self.tempEnemy.update(self.player, dt)
         return task.cont
         
